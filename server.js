@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 
 // 2. Configuração inicial
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = 'seu_segredo_super_secreto_pode_ser_qualquer_coisa';
 const MONGO_URI = 'mongodb+srv://admin:B2UDpYdwy8sg8DSa@cluster0.klszy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 

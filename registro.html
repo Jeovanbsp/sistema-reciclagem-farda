@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <title>Registo de Conta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Criar Nova Conta</h2>
+        <p class="text-center text-gray-500 mb-8">Registe-se para aceder ao sistema.</p>
+
+        <form id="register-form">
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700 font-semibold mb-2">Email</label>
+                <input type="email" id="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 font-semibold mb-2">Senha</label>
+                <input type="password" id="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+            </div>
+            <div id="message" class="mb-4 text-center text-sm font-medium"></div>
+            <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition-colors">Criar Conta</button>
+        </form>
+        <div class="text-center mt-6">
+            <p class="text-gray-600">Já tem uma conta? <a href="login.html" class="text-green-600 font-semibold hover:underline">Entrar</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            try {
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = data.message + ' Redirecionando para login...';
+                    messageDiv.className = 'mb-4 text-center text-sm font-medium text-green-600';
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                } else {
+                    messageDiv.textContent = data.message;
+                    messageDiv.className = 'mb-4 text-center text-sm font-medium text-red-600';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Ocorreu um erro ao criar a conta.';
+                messageDiv.className = 'mb-4 text-center text-sm font-medium text-red-600';
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal - Sistema de Coleta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-700">Sistema Farda</h1>
+            <div>
+                <a href="historico.html" class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Ver Histórico</a>
+                <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+            
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-700">Registar Nova Coleta</h2>
+
+            <!-- Mensagem de feedback -->
+            <div id="message" class="mb-4 text-center text-sm font-medium"></div>
+
+            <!-- Formulário de Coleta -->
+            <form id="coletaForm" class="space-y-6">
+                
+                <!-- Origem do Material -->
+                <div>
+                    <label for="origem" class="block text-sm font-medium text-gray-700 mb-1">Origem do Material (Ex: Batalhão X, Empresa Y)</label>
+                    <input type="text" id="origem" name="origem" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <!-- Peças Pré-definidas -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Peças Pré-definidas</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <!-- Coluna 1 -->
+                        <div class="space-y-4">
+                            <div>
+                                <label for="camisaMalha" class="block text-sm font-medium text-gray-700">Camisa (malha)</label>
+                                <input type="number" id="camisaMalha" name="peca" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="gandolaRipstop" class="block text-sm font-medium text-gray-700">Gandola (ripstop)</label>
+                                <input type="number" id="gandolaRipstop" name="peca" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="calcaRipstop" class="block text-sm font-medium text-gray-700">Calça (ripstop)</label>
+                                <input type="number" id="calcaRipstop" name="peca" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                             <div>
+                                <label for="chapeuRipstop" class="block text-sm font-medium text-gray-700">Chapéu (ripstop)</label>
+                                <input type="number" id="chapeuRipstop" name="peca" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                        </div>
+                        <!-- Coluna 2 -->
+                        <div class="space-y-4">
+                            <div>
+                                <label for="camisaOxford" class="block text-sm font-medium text-gray-700">Camisa (oxford)</label>
+                                <input type="number" id="camisaOxford" name="peca" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="calcaOxford" class="block text-sm font-medium text-gray-700">Calça (oxford)</label>
+                                <input type="number" id="calcaOxford" name="peca" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="chapeuOxford" class="block text-sm font-medium text-gray-700">Chapéu (oxford)</label>
+                                <input type="number" id="chapeuOxford" name="peca" min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outras Peças Dinâmicas -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Outras Peças (não catalogadas)</h3>
+                        <button type="button" id="addPecaBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Adicionar Peça
+                        </button>
+                    </div>
+                    <div id="outrasPecasContainer" class="space-y-4">
+                        <!-- Linhas de peças dinâmicas serão inseridas aqui -->
+                    </div>
+                </div>
+
+                <!-- Totais -->
+                <div class="border-t border-gray-200 pt-6 mt-6 bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 text-center">Impacto Total Estimado</h3>
+                    <div class="flex justify-around text-center">
+                        <div>
+                            <p class="text-sm text-gray-600">Peso Total</p>
+                            <p id="pesoTotal" class="text-2xl font-bold text-green-600">0.00 kg</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">CO₂ Evitado</p>
+                            <p id="co2Total" class="text-2xl font-bold text-green-600">0.00 kg</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão de Submissão -->
+                <div class="pt-6">
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                        Salvar Coleta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // Script de proteção de página
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+            }
+
+            // Lógica de logout
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            });
+
+            // --- LÓGICA DO FORMULÁRIO ---
+
+            const form = document.getElementById('coletaForm');
+            const messageDiv = document.getElementById('message');
+            
+            // Fatores de conversão (peso em kg e CO2 em kg por peça)
+            const fatores = {
+                camisaMalha: { peso: 0.25, co2: 7.5 },
+                gandolaRipstop: { peso: 0.80, co2: 24.0 },
+                calcaRipstop: { peso: 0.70, co2: 21.0 },
+                chapeuRipstop: { peso: 0.15, co2: 4.5 },
+                camisaOxford: { peso: 0.30, co2: 9.0 },
+                calcaOxford: { peso: 0.60, co2: 18.0 },
+                chapeuOxford: { peso: 0.12, co2: 3.6 }
+            };
+
+            // Função para calcular totais
+            function calcularTotais() {
+                let pesoTotal = 0;
+                let co2Total = 0;
+
+                // Calcula para peças pré-definidas
+                document.querySelectorAll('input[name="peca"]').forEach(input => {
+                    const quantidade = parseInt(input.value) || 0;
+                    if (quantidade > 0 && fatores[input.id]) {
+                        pesoTotal += quantidade * fatores[input.id].peso;
+                        co2Total += quantidade * fatores[input.id].co2;
+                    }
+                });
+
+                // Calcula para outras peças
+                document.querySelectorAll('.outra-peca-item').forEach(item => {
+                    const peso = parseFloat(item.querySelector('input[name="outroPeso"]').value) || 0;
+                    const co2 = parseFloat(item.querySelector('input[name="outroCo2"]').value) || 0;
+                    pesoTotal += peso;
+                    co2Total += co2;
+                });
+
+                document.getElementById('pesoTotal').textContent = `${pesoTotal.toFixed(2)} kg`;
+                document.getElementById('co2Total').textContent = `${co2Total.toFixed(2)} kg`;
+            }
+
+            // Adiciona listeners para recalcular automaticamente
+            form.addEventListener('input', calcularTotais);
+
+            // Lógica para adicionar peças dinâmicas
+            const addPecaBtn = document.getElementById('addPecaBtn');
+            const outrasPecasContainer = document.getElementById('outrasPecasContainer');
+            let pecaIndex = 0;
+
+            addPecaBtn.addEventListener('click', () => {
+                pecaIndex++;
+                const pecaDiv = document.createElement('div');
+                pecaDiv.classList.add('outra-peca-item', 'grid', 'grid-cols-12', 'gap-2', 'items-center');
+                pecaDiv.innerHTML = `
+                    <div class="col-span-4">
+                        <input type="text" name="outroTipo" placeholder="Tipo de Material" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div class="col-span-3">
+                        <input type="number" name="outroPeso" placeholder="Peso (kg)" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div class="col-span-3">
+                        <input type="number" name="outroCo2" placeholder="CO₂ (kg)" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div class="col-span-2 text-right">
+                        <button type="button" class="remove-peca-btn bg-red-500 text-white px-2 py-1 rounded-md text-xs">Remover</button>
+                    </div>
+                `;
+                outrasPecasContainer.appendChild(pecaDiv);
+
+                pecaDiv.querySelector('.remove-peca-btn').addEventListener('click', () => {
+                    pecaDiv.remove();
+                    calcularTotais();
+                });
+            });
+
+            // Lógica de submissão do formulário
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                messageDiv.textContent = '';
+                
+                const pecas = {
+                    camisaMalha: parseInt(document.getElementById('camisaMalha').value) || 0,
+                    gandolaRipstop: parseInt(document.getElementById('gandolaRipstop').value) || 0,
+                    calcaRipstop: parseInt(document.getElementById('calcaRipstop').value) || 0,
+                    chapeuRipstop: parseInt(document.getElementById('chapeuRipstop').value) || 0,
+                    camisaOxford: parseInt(document.getElementById('camisaOxford').value) || 0,
+                    calcaOxford: parseInt(document.getElementById('calcaOxford').value) || 0,
+                    chapeuOxford: parseInt(document.getElementById('chapeuOxford').value) || 0,
+                };
+
+                const outrasPecas = [];
+                document.querySelectorAll('.outra-peca-item').forEach(item => {
+                    const tipo = item.querySelector('input[name="outroTipo"]').value;
+                    const peso = parseFloat(item.querySelector('input[name="outroPeso"]').value);
+                    const co2 = parseFloat(item.querySelector('input[name="outroCo2"]').value);
+                    if (tipo && peso > 0 && co2 > 0) {
+                        outrasPecas.push({ tipo, peso, co2 });
+                    }
+                });
+
+                const data = {
+                    origem: document.getElementById('origem').value,
+                    pecas,
+                    outrasPecas
+                };
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/coletas', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        messageDiv.textContent = 'Coleta registada com sucesso!';
+                        messageDiv.className = 'mb-4 text-center text-sm font-medium text-green-600';
+                        form.reset();
+                        document.getElementById('outrasPecasContainer').innerHTML = '';
+                        calcularTotais();
+                    } else {
+                        throw new Error(result.message || 'Ocorreu um erro.');
+                    }
+                } catch (error) {
+                    messageDiv.textContent = `Erro: ${error.message}`;
+                    messageDiv.className = 'mb-4 text-center text-sm font-medium text-red-600';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+

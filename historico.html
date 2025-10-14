@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Coletas - Sistema Farda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal { display: none; }
+        .modal.flex { display: flex; }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-700">Sistema Farda</h1>
+            <div>
+                <a href="index.html" class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Registar Coleta</a>
+                <button id="logoutButton" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <h2 class="text-3xl font-bold mb-6 text-gray-800">Histórico de Coletas</h2>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Origem</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso Total</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CO₂ Evitado</th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaHistorico" class="bg-white divide-y divide-gray-200">
+                        <!-- Linhas da tabela serão inseridas aqui via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Detalhes -->
+    <div id="modalDetalhes" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full justify-center items-center">
+        <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Detalhes da Coleta</h3>
+                <div id="modalDetalhesConteudo" class="mt-2 px-7 py-3 text-left">
+                    <!-- Conteúdo dos detalhes será inserido aqui -->
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="fecharModalDetalhes" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Apagar -->
+    <div id="modalApagar" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full justify-center items-center">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Confirmar Exclusão</h3>
+                <p class="text-sm text-gray-500 mt-2">Você tem certeza que quer apagar este registo? Esta ação não pode ser desfeita.</p>
+                <div class="items-center px-4 py-3 mt-4 flex justify-center space-x-4">
+                    <button id="confirmarApagarBtn" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none">
+                        Sim, Apagar
+                    </button>
+                    <button id="cancelarApagarBtn" class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Editar -->
+    <div id="modalEditar" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full justify-center items-center">
+        <div class="relative mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+             <form id="editForm">
+                <h3 class="text-xl leading-6 font-medium text-gray-900 mb-6 text-center">Editar Coleta</h3>
+                
+                 <!-- Formulário igual ao da página index -->
+                 <div class="space-y-6">
+                    <div>
+                        <label for="editOrigem" class="block text-sm font-medium text-gray-700">Origem do Material</label>
+                        <input type="text" id="editOrigem" required class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div class="border-t pt-4">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Peças Pré-definidas</h4>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                            <div class="space-y-4">
+                                <div><label class="block text-sm">Camisa (malha)</label><input type="number" id="editCamisaMalha" name="peca" min="0" value="0" class="w-full px-3 py-2 border rounded-md"></div>
+                                <div><label class="block text-sm">Gandola (ripstop)</label><input type="number" id="editGandolaRipstop" name="peca" min="0" value="0" class="w-full px-3 py-2 border rounded-md"></div>
+                                <div><label class="block text-sm">Calça (ripstop)</label><input type="number" id="editCalcaRipstop" name="peca" min="0" value="0" class="w-full px-3 py-2 border rounded-md"></div>
+                                <div><label class="block text-sm">Chapéu (ripstop)</label><input type="number" id="editChapeuRipstop" name="peca" min="0" value="0" class="w-full px-3 py-2 border rounded-md"></div>
+                            </div>
+                            <div class="space-y-4">
+                                <div><label class="block text-sm">Camisa (oxford)</label><input type="number" id="editCamisaOxford" name="peca" min="0" value="0" class="w-full px-3 py-2 border rounded-md"></div>
+                                <div><label class="block text-sm">Calça (oxford)</label><input type="number" id="editCalcaOxford" name="peca" min="0" value="0" class="w-full px-3 py-2 border rounded-md"></div>
+                                <div><label class="block text-sm">Chapéu (oxford)</label><input type="number" id="editChapeuOxford" name="peca" min="0" value="0" class="w-full px-3 py-2 border rounded-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between items-center mb-4">
+                             <h4 class="text-lg font-semibold text-gray-800">Outras Peças</h4>
+                             <button type="button" id="editAddPecaBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md text-sm">Adicionar</button>
+                        </div>
+                        <div id="editOutrasPecasContainer" class="space-y-3"></div>
+                    </div>
+                     <div class="border-t pt-4 bg-gray-50 p-4 rounded-lg">
+                         <div class="flex justify-around text-center">
+                            <div><p class="text-sm">Peso Total</p><p id="editPesoTotal" class="text-xl font-bold text-green-600">0.00 kg</p></div>
+                            <div><p class="text-sm">CO₂ Evitado</p><p id="editCo2Total" class="text-xl font-bold text-green-600">0.00 kg</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="items-center px-4 py-3 mt-6 flex justify-end space-x-4">
+                    <button type="submit" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-green-600">Salvar Alterações</button>
+                    <button id="cancelarEditarBtn" type="button" class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            });
+
+            const tabelaHistorico = document.getElementById('tabelaHistorico');
+            let coletasData = []; // Armazena os dados das coletas
+
+            // --- MODAIS ---
+            const modalDetalhes = document.getElementById('modalDetalhes');
+            const modalApagar = document.getElementById('modalApagar');
+            const modalEditar = document.getElementById('modalEditar');
+            
+            // Botões de fechar/cancelar
+            document.getElementById('fecharModalDetalhes').addEventListener('click', () => modalDetalhes.classList.remove('flex'));
+            document.getElementById('cancelarApagarBtn').addEventListener('click', () => modalApagar.classList.remove('flex'));
+            document.getElementById('cancelarEditarBtn').addEventListener('click', () => modalEditar.classList.remove('flex'));
+
+            // --- LÓGICA PRINCIPAL ---
+            try {
+                const response = await fetch('http://localhost:3000/api/coletas', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Falha ao carregar o histórico.');
+                
+                coletasData = await response.json();
+                renderizarTabela();
+
+            } catch (error) {
+                tabelaHistorico.innerHTML = `<tr><td colspan="5" class="text-center py-4">${error.message}</td></tr>`;
+            }
+
+            function renderizarTabela() {
+                tabelaHistorico.innerHTML = '';
+                if (coletasData.length === 0) {
+                     tabelaHistorico.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-500">Nenhum registo encontrado.</td></tr>`;
+                     return;
+                }
+
+                coletasData.forEach(coleta => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">${new Date(coleta.timestamp).toLocaleDateString('pt-BR')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${coleta.origem}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${coleta.pesoTotalKg.toFixed(2)} kg</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${coleta.co2EvitadoKg.toFixed(2)} kg</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
+                            <button data-id="${coleta._id}" class="ver-btn text-indigo-600 hover:text-indigo-900">Detalhes</button>
+                            <button data-id="${coleta._id}" class="editar-btn text-green-600 hover:text-green-900">Editar</button>
+                            <button data-id="${coleta._id}" class="apagar-btn text-red-600 hover:text-red-900">Apagar</button>
+                        </td>
+                    `;
+                    tabelaHistorico.appendChild(tr);
+                });
+            }
+
+            // --- EVENT LISTENERS PARA AÇÕES ---
+            tabelaHistorico.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                if (!id) return;
+
+                if (e.target.classList.contains('ver-btn')) {
+                    abrirModalDetalhes(id);
+                }
+                if (e.target.classList.contains('apagar-btn')) {
+                    abrirModalApagar(id);
+                }
+                if (e.target.classList.contains('editar-btn')) {
+                    abrirModalEdicao(id);
+                }
+            });
+
+            // --- FUNÇÕES DOS MODAIS ---
+
+            function abrirModalDetalhes(id) {
+                const coleta = coletasData.find(c => c._id === id);
+                const conteudo = document.getElementById('modalDetalhesConteudo');
+                
+                let pecasHTML = '<h4 class="font-semibold mt-2">Peças Pré-definidas:</h4><ul class="list-disc list-inside text-sm">';
+                Object.entries(coleta.pecas).forEach(([key, value]) => {
+                    if (value > 0) pecasHTML += `<li>${formatarNomePeca(key)}: ${value}</li>`;
+                });
+                pecasHTML += '</ul>';
+
+                // **NOVO CÓDIGO PARA MOSTRAR "OUTRAS PEÇAS"**
+                if (coleta.outrasPecas && coleta.outrasPecas.length > 0) {
+                    pecasHTML += '<h4 class="font-semibold mt-4">Outras Peças:</h4><ul class="list-disc list-inside text-sm">';
+                    coleta.outrasPecas.forEach(peca => {
+                        pecasHTML += `<li>${peca.tipo}: ${peca.peso.toFixed(2)} kg (Peso), ${peca.co2.toFixed(2)} kg (CO₂)</li>`;
+                    });
+                    pecasHTML += '</ul>';
+                }
+
+                conteudo.innerHTML = pecasHTML;
+                modalDetalhes.classList.add('flex');
+            }
+
+            let idParaApagar = null;
+            function abrirModalApagar(id) {
+                idParaApagar = id;
+                modalApagar.classList.add('flex');
+            }
+
+            document.getElementById('confirmarApagarBtn').addEventListener('click', async () => {
+                if (!idParaApagar) return;
+                try {
+                    const response = await fetch(`http://localhost:3000/api/coletas/${idParaApagar}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Falha ao apagar.');
+                    
+                    coletasData = coletasData.filter(c => c._id !== idParaApagar);
+                    renderizarTabela();
+                    modalApagar.classList.remove('flex');
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+
+            // --- LÓGICA DE EDIÇÃO ---
+            const editForm = document.getElementById('editForm');
+            let idParaEditar = null;
+            const fatores = {
+                camisaMalha: { peso: 0.25, co2: 7.5 }, gandolaRipstop: { peso: 0.80, co2: 24.0 },
+                calcaRipstop: { peso: 0.70, co2: 21.0 }, chapeuRipstop: { peso: 0.15, co2: 4.5 },
+                camisaOxford: { peso: 0.30, co2: 9.0 }, calcaOxford: { peso: 0.60, co2: 18.0 },
+                chapeuOxford: { peso: 0.12, co2: 3.6 }
+            };
+
+            function calcularTotaisEdicao() {
+                let pesoTotal = 0, co2Total = 0;
+                 Object.keys(fatores).forEach(key => {
+                    const inputId = `edit${key.charAt(0).toUpperCase() + key.slice(1)}`;
+                    const quantidade = parseInt(document.getElementById(inputId).value) || 0;
+                    if (quantidade > 0) {
+                        pesoTotal += quantidade * fatores[key].peso;
+                        co2Total += quantidade * fatores[key].co2;
+                    }
+                });
+                document.querySelectorAll('.edit-outra-peca-item').forEach(item => {
+                    const peso = parseFloat(item.querySelector('input[name="editOutroPeso"]').value) || 0;
+                    const co2 = parseFloat(item.querySelector('input[name="editOutroCo2"]').value) || 0;
+                    pesoTotal += peso; co2Total += co2;
+                });
+                document.getElementById('editPesoTotal').textContent = `${pesoTotal.toFixed(2)} kg`;
+                document.getElementById('editCo2Total').textContent = `${co2Total.toFixed(2)} kg`;
+            }
+
+            function abrirModalEdicao(id) {
+                idParaEditar = id;
+                const coleta = coletasData.find(c => c._id === id);
+                document.getElementById('editOrigem').value = coleta.origem;
+                Object.keys(coleta.pecas).forEach(key => {
+                    const inputId = `edit${key.charAt(0).toUpperCase() + key.slice(1)}`;
+                    document.getElementById(inputId).value = coleta.pecas[key] || 0;
+                });
+
+                // **NOVO CÓDIGO PARA CARREGAR "OUTRAS PEÇAS" NO FORMULÁRIO DE EDIÇÃO**
+                const container = document.getElementById('editOutrasPecasContainer');
+                container.innerHTML = ''; // Limpa o container
+                if (coleta.outrasPecas && coleta.outrasPecas.length > 0) {
+                    coleta.outrasPecas.forEach(peca => {
+                       adicionarLinhaPecaEdicao(peca.tipo, peca.peso, peca.co2);
+                    });
+                }
+                
+                calcularTotaisEdicao();
+                modalEditar.classList.add('flex');
+            }
+
+            editForm.addEventListener('input', calcularTotaisEdicao);
+            document.getElementById('editAddPecaBtn').addEventListener('click', () => adicionarLinhaPecaEdicao());
+
+            function adicionarLinhaPecaEdicao(tipo = '', peso = '', co2 = '') {
+                 const container = document.getElementById('editOutrasPecasContainer');
+                 const pecaDiv = document.createElement('div');
+                 pecaDiv.classList.add('edit-outra-peca-item', 'grid', 'grid-cols-12', 'gap-2', 'items-center');
+                 pecaDiv.innerHTML = `
+                    <div class="col-span-4"><input type="text" name="editOutroTipo" placeholder="Tipo" class="w-full px-2 py-1 border rounded text-sm" value="${tipo}"></div>
+                    <div class="col-span-3"><input type="number" name="editOutroPeso" placeholder="Peso (kg)" min="0" step="0.01" class="w-full px-2 py-1 border rounded text-sm" value="${peso}"></div>
+                    <div class="col-span-3"><input type="number" name="editOutroCo2" placeholder="CO₂ (kg)" min="0" step="0.01" class="w-full px-2 py-1 border rounded text-sm" value="${co2}"></div>
+                    <div class="col-span-2 text-right"><button type="button" class="remove-peca-btn bg-red-500 text-white px-2 py-1 rounded text-xs">Remover</button></div>
+                `;
+                container.appendChild(pecaDiv);
+                pecaDiv.querySelector('.remove-peca-btn').addEventListener('click', () => {
+                    pecaDiv.remove();
+                    calcularTotaisEdicao();
+                });
+            }
+            
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const pecas = {};
+                Object.keys(fatores).forEach(key => {
+                     const inputId = `edit${key.charAt(0).toUpperCase() + key.slice(1)}`;
+                     pecas[key] = parseInt(document.getElementById(inputId).value) || 0;
+                });
+
+                const outrasPecas = [];
+                document.querySelectorAll('.edit-outra-peca-item').forEach(item => {
+                    const tipo = item.querySelector('input[name="editOutroTipo"]').value;
+                    const peso = parseFloat(item.querySelector('input[name="editOutroPeso"]').value);
+                    const co2 = parseFloat(item.querySelector('input[name="editOutroCo2"]').value);
+                    if (tipo && peso > 0 && co2 > 0) outrasPecas.push({ tipo, peso, co2 });
+                });
+
+                const data = {
+                    origem: document.getElementById('editOrigem').value,
+                    pecas,
+                    outrasPecas
+                };
+                
+                try {
+                    const response = await fetch(`http://localhost:3000/api/coletas/${idParaEditar}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.message || 'Falha ao atualizar.');
+
+                    const index = coletasData.findIndex(c => c._id === idParaEditar);
+                    coletasData[index] = result.coleta;
+                    renderizarTabela();
+                    modalEditar.classList.remove('flex');
+
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+
+            // --- FUNÇÃO AUXILIAR ---
+            function formatarNomePeca(key) {
+                return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('Ripstop', '(ripstop)').replace('Oxford', '(oxford)').replace('Malha', '(malha)');
+            }
+        });
+    </script>
+
+</body>
+</html>

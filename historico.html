@@ -92,7 +92,6 @@
              <form id="editForm">
                 <h3 class="text-xl leading-6 font-medium text-gray-900 mb-6 text-center">Editar Coleta</h3>
                 
-                 <!-- Formulário igual ao da página index -->
                  <div class="space-y-6">
                     <div>
                         <label for="editOrigem" class="block text-sm font-medium text-gray-700">Origem do Material</label>
@@ -152,21 +151,18 @@
             });
 
             const tabelaHistorico = document.getElementById('tabelaHistorico');
-            let coletasData = []; // Armazena os dados das coletas
+            let coletasData = []; 
 
-            // --- MODAIS ---
             const modalDetalhes = document.getElementById('modalDetalhes');
             const modalApagar = document.getElementById('modalApagar');
             const modalEditar = document.getElementById('modalEditar');
             
-            // Botões de fechar/cancelar
             document.getElementById('fecharModalDetalhes').addEventListener('click', () => modalDetalhes.classList.remove('flex'));
             document.getElementById('cancelarApagarBtn').addEventListener('click', () => modalApagar.classList.remove('flex'));
             document.getElementById('cancelarEditarBtn').addEventListener('click', () => modalEditar.classList.remove('flex'));
 
-            // --- LÓGICA PRINCIPAL ---
             try {
-                const response = await fetch('http://localhost:3000/api/coletas', {
+                const response = await fetch('https://api-reciclagem-farda.onrender.com/api/coletas', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) throw new Error('Falha ao carregar o histórico.');
@@ -202,23 +198,14 @@
                 });
             }
 
-            // --- EVENT LISTENERS PARA AÇÕES ---
             tabelaHistorico.addEventListener('click', (e) => {
                 const id = e.target.dataset.id;
                 if (!id) return;
 
-                if (e.target.classList.contains('ver-btn')) {
-                    abrirModalDetalhes(id);
-                }
-                if (e.target.classList.contains('apagar-btn')) {
-                    abrirModalApagar(id);
-                }
-                if (e.target.classList.contains('editar-btn')) {
-                    abrirModalEdicao(id);
-                }
+                if (e.target.classList.contains('ver-btn')) abrirModalDetalhes(id);
+                if (e.target.classList.contains('apagar-btn')) abrirModalApagar(id);
+                if (e.target.classList.contains('editar-btn')) abrirModalEdicao(id);
             });
-
-            // --- FUNÇÕES DOS MODAIS ---
 
             function abrirModalDetalhes(id) {
                 const coleta = coletasData.find(c => c._id === id);
@@ -230,7 +217,6 @@
                 });
                 pecasHTML += '</ul>';
 
-                // **NOVO CÓDIGO PARA MOSTRAR "OUTRAS PEÇAS"**
                 if (coleta.outrasPecas && coleta.outrasPecas.length > 0) {
                     pecasHTML += '<h4 class="font-semibold mt-4">Outras Peças:</h4><ul class="list-disc list-inside text-sm">';
                     coleta.outrasPecas.forEach(peca => {
@@ -252,7 +238,7 @@
             document.getElementById('confirmarApagarBtn').addEventListener('click', async () => {
                 if (!idParaApagar) return;
                 try {
-                    const response = await fetch(`http://localhost:3000/api/coletas/${idParaApagar}`, {
+                    const response = await fetch(`https://api-reciclagem-farda.onrender.com/api/coletas/${idParaApagar}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -266,7 +252,6 @@
                 }
             });
 
-            // --- LÓGICA DE EDIÇÃO ---
             const editForm = document.getElementById('editForm');
             let idParaEditar = null;
             const fatores = {
@@ -304,9 +289,8 @@
                     document.getElementById(inputId).value = coleta.pecas[key] || 0;
                 });
 
-                // **NOVO CÓDIGO PARA CARREGAR "OUTRAS PEÇAS" NO FORMULÁRIO DE EDIÇÃO**
                 const container = document.getElementById('editOutrasPecasContainer');
-                container.innerHTML = ''; // Limpa o container
+                container.innerHTML = '';
                 if (coleta.outrasPecas && coleta.outrasPecas.length > 0) {
                     coleta.outrasPecas.forEach(peca => {
                        adicionarLinhaPecaEdicao(peca.tipo, peca.peso, peca.co2);
@@ -360,7 +344,7 @@
                 };
                 
                 try {
-                    const response = await fetch(`http://localhost:3000/api/coletas/${idParaEditar}`, {
+                    const response = await fetch(`https://api-reciclagem-farda.onrender.com/api/coletas/${idParaEditar}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify(data)
@@ -378,7 +362,6 @@
                 }
             });
 
-            // --- FUNÇÃO AUXILIAR ---
             function formatarNomePeca(key) {
                 return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('Ripstop', '(ripstop)').replace('Oxford', '(oxford)').replace('Malha', '(malha)');
             }

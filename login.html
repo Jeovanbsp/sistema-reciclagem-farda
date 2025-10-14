@@ -63,7 +63,8 @@
                 const password = document.getElementById('password').value;
 
                 try {
-                    const response = await fetch('http://localhost:3000/api/login', {
+                    // ALTERAÇÃO IMPORTANTE AQUI
+                    const response = await fetch('https://api-reciclagem-farda.onrender.com/api/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -74,11 +75,9 @@
                     const result = await response.json();
 
                     if (response.ok) {
-                        // Guarda o token e redireciona
                         localStorage.setItem('token', result.token);
                         window.location.href = 'index.html';
                     } else {
-                        // Mostra a mensagem de erro do servidor
                         throw new Error(result.message || 'Ocorreu um erro no login.');
                     }
                 } catch (error) {
